@@ -1,0 +1,12 @@
+.venv/
+generated/
+导出音频/
+config.local.json
+__pycache__/
+.clone-venv/
+models/
+clone-config.local.json
+clone-install-status.json
+.env
+*.log
+.DS_Store

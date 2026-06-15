@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f2eee6" />
+    <title>轻声 - 文字转语音</title>
+    <link rel="stylesheet" href="style.css?v=20260615-2" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="hero">
+        <div class="brand-mark" aria-hidden="true">
+          <i></i><i></i><i></i><i></i><i></i>
+        </div>
+        <div class="hero-copy">
+          <p id="heroEyebrow" class="eyebrow">NEURAL TEXT TO SPEECH</p>
+          <h1 id="heroTitle">把文字，变成声音。</h1>
+          <p id="heroSubtitle">选择喜欢的音色，生成可试听、可下载的 MP3。</p>
+        </div>
+        <div class="privacy-pill"><span></span>本地工具</div>
+      </header>
+
+      <nav class="mode-tabs" aria-label="功能切换">
+        <button class="mode-tab active" type="button" data-view="ttsView">文字转语音</button>
+        <button class="mode-tab" type="button" data-view="cloneView">
+          音色克隆
+          <span>正式版</span>
+        </button>
+      </nav>
+
+      <div id="ttsView" class="app-view active">
+      <section class="workspace">
+        <div class="editor-panel">
+          <div class="section-heading">
+            <div>
+              <span class="step">01</span>
+              <h2>输入文字</h2>
+            </div>
+            <span id="charCount">0 / 10000</span>
+          </div>
+
+          <textarea id="textInput" maxlength="10000" placeholder="输入想要转换成语音的内容……">很久很久以前，在一座安静的小城里，住着一位喜欢仰望星空的少年。夜风轻轻吹过屋檐，故事也从这里开始。</textarea>
+
+          <div class="quick-text">
+            <span>示例</span>
+            <button type="button" data-text="大家好，今天想和你分享一个简单，却很重要的故事。">口播开场</button>
+            <button type="button" data-text="很久很久以前，在一座安静的小城里，住着一位喜欢仰望星空的少年。夜风轻轻吹过屋檐，故事也从这里开始。">故事旁白</button>
+            <button type="button" data-text="接下来为您播报今日资讯。请关注最新动态，合理安排出行时间。">资讯播报</button>
+          </div>
+        </div>
+
+        <aside class="settings-panel">
+          <div class="section-heading">
+            <div>
+              <span class="step">02</span>
+              <h2>选择声音</h2>
+            </div>
+            <button id="refreshVoices" class="text-button" type="button">刷新</button>
+          </div>
+
+          <div id="voicePresets" class="preset-grid">
+            <button type="button" class="preset active" data-preset="xiaocheng">
+              <strong>晓辰</strong><span>普通话简体</span>
+            </button>
+            <button type="button" class="preset" data-preset="xiaocheng-hd">
+              <strong>晓辰 HD</strong><span>Dragon Latest</span>
+            </button>
+            <button type="button" class="preset" data-preset="xiaocheng-flash">
+              <strong>晓辰 Flash</strong><span>8 种样式</span>
+            </button>
+          </div>
+
+          <label class="field-label" for="voiceSelect">全部中文音色</label>
+          <div class="select-wrap">
+            <select id="voiceSelect" disabled>
+              <option>正在获取在线音色…</option>
+            </select>
+          </div>
+          <p id="voiceHint" class="hint">微软晓辰，中文普通话（简体）。需要 Azure Speech。</p>
+
+          <div id="styleField" class="style-field" hidden>
+            <label class="field-label" for="styleSelect">Flash 表达样式</label>
+            <div class="select-wrap">
+              <select id="styleSelect">
+                <option value="default">自动 / 默认</option>
+                <option value="cheerful">欢快</option>
+                <option value="debating">辩论</option>
+                <option value="empathetic">共情</option>
+                <option value="live-commercial">直播带货</option>
+                <option value="poetry-reading">诗歌朗读</option>
+                <option value="sad">悲伤</option>
+                <option value="sorry">抱歉</option>
+              </select>
+            </div>
+          </div>
+
+          <details id="azureSettings" class="azure-settings">
+            <summary>配置精确晓辰音色</summary>
+            <p>密钥只保存在本机，不会写入网页或上传到其他位置。</p>
+            <label for="azureKey">Azure Speech 密钥</label>
+            <input id="azureKey" type="password" autocomplete="off" placeholder="输入 Speech 资源密钥" />
+            <label for="azureRegion">资源区域</label>
+            <input id="azureRegion" type="text" value="eastasia" placeholder="例如 eastasia" />
+            <button id="saveAzure" type="button">保存配置</button>
+            <span id="azureStatus">尚未配置</span>
+          </details>
+
+          <div class="adjustments">
+            <div class="slider-group">
+              <div><label for="rate">语速</label><output id="rateValue">0%</output></div>
+              <input id="rate" type="range" min="-50" max="50" value="0" step="1" />
+            </div>
+            <div class="slider-group">
+              <div><label for="pitch">音调</label><output id="pitchValue">0%</output></div>
+              <input id="pitch" type="range" min="-50" max="50" value="0" step="1" />
+            </div>
+            <div class="slider-group">
+              <div><label for="volume">音量</label><output id="volumeValue">0%</output></div>
+              <input id="volume" type="range" min="-50" max="50" value="0" step="1" />
+            </div>
+          </div>
+
+          <button id="generateButton" class="generate-button" type="button" disabled>
+            <span class="button-icon">✦</span>
+            <span class="button-text">生成语音</span>
+          </button>
+          <p id="statusText" class="status-text">正在连接语音服务…</p>
+        </aside>
+      </section>
+
+      <section id="resultPanel" class="result-panel" hidden>
+        <div class="result-title">
+          <div class="result-icon">♪</div>
+          <div><span>生成完成</span><strong id="resultVoice">语音音频</strong></div>
+        </div>
+        <audio id="audioPlayer" controls></audio>
+        <div class="result-actions">
+          <button id="downloadButton" class="download-button" type="button">下载 MP3</button>
+          <button id="openFolderButton" class="folder-button" type="button">打开音频文件夹</button>
+        </div>
+      </section>
+      </div>
+
+      <div id="cloneView" class="app-view">
+        <section class="clone-intro">
+          <div>
+          <p class="eyebrow">VOICE CLONING STUDIO</p>
+            <h2>创建属于你的声音。</h2>
+            <p>用一段清晰录音建立音色档案，再用它生成新的语音。</p>
+          </div>
+          <span class="demo-badge">提供商可插拔</span>
+        </section>
+
+        <section class="clone-workspace">
+          <div class="clone-main">
+            <div class="clone-step-heading">
+              <span class="step">01</span>
+              <div>
+                <h3>添加声音样本</h3>
+              <p>建议使用 10–30 秒、无音乐和回声的本人授权录音。</p>
+              </div>
+            </div>
+
+            <div id="sampleDropzone" class="sample-dropzone">
+              <div class="mic-orbit">
+                <span class="mic-icon"></span>
+              </div>
+              <strong>录制一段声音，或上传已有音频</strong>
+              <p>支持 MP3、WAV、M4A、WebM；配置引擎前只在浏览器中读取</p>
+              <div class="sample-actions">
+                <button id="recordButton" class="record-button" type="button">
+                  <span></span>开始录音
+                </button>
+                <label class="upload-button" for="sampleFile">选择音频</label>
+                <input id="sampleFile" type="file" accept="audio/*" hidden />
+              </div>
+              <span id="recordTimer" class="record-timer">00:00</span>
+            </div>
+
+            <div id="samplePreview" class="sample-preview" hidden>
+              <div class="sample-preview-head">
+                <div>
+                  <span class="sample-status-dot"></span>
+                  <strong id="sampleName">声音样本</strong>
+                </div>
+                <button id="removeSample" type="button">移除</button>
+              </div>
+              <div id="waveform" class="waveform" aria-hidden="true"></div>
+              <audio id="samplePlayer" controls></audio>
+              <div class="sample-metrics">
+                <div><span>时长</span><strong id="sampleDuration">--</strong></div>
+                <div><span>采样率</span><strong id="sampleRate">--</strong></div>
+                <div><span>声道</span><strong id="sampleChannels">--</strong></div>
+                <div><span>质量</span><strong id="sampleQuality">检查中</strong></div>
+              </div>
+            </div>
+
+            <div class="clone-step-heading second">
+              <span class="step">02</span>
+              <div>
+                <h3>命名并确认授权</h3>
+                <p>只克隆你本人或已获得明确授权的声音。</p>
+              </div>
+            </div>
+
+            <div class="clone-form">
+              <label for="cloneName">音色名称</label>
+              <input id="cloneName" type="text" maxlength="30" placeholder="例如：我的旁白声" />
+              <label class="consent-check">
+                <input id="consentCheck" type="checkbox" />
+                <span>我确认这是本人的声音，或已获得声音本人的明确授权。</span>
+              </label>
+              <button id="createCloneButton" class="create-clone-button" type="button" disabled>
+                保存音色档案
+              </button>
+              <p id="cloneStatus" class="clone-status">添加样本并选择克隆引擎后即可继续。</p>
+            </div>
+          </div>
+
+          <aside class="clone-side">
+            <div class="clone-step-heading">
+              <span class="step">03</span>
+              <div>
+                <h3>选择克隆引擎</h3>
+                <p>可随时切换，不影响样本质量检查。</p>
+              </div>
+            </div>
+
+            <div id="providerCards" class="provider-cards">
+              <button class="provider-card active" type="button" data-provider="local">
+                <span class="provider-icon local">L</span>
+                <span><strong>本地模型</strong><small>隐私最佳 · 尚未安装</small></span>
+                <b>未配置</b>
+              </button>
+              <button class="provider-card" type="button" data-provider="minimax">
+                <span class="provider-icon minimax">M</span>
+                <span><strong>MiniMax</strong><small>中文自然 · 需要 API Key</small></span>
+                <b>未配置</b>
+              </button>
+              <button class="provider-card" type="button" data-provider="fish">
+                <span class="provider-icon fish">F</span>
+                <span><strong>Fish Audio</strong><small>音色丰富 · 需要 API Key</small></span>
+                <b>未配置</b>
+              </button>
+              <button class="provider-card" type="button" data-provider="mimo">
+                <span class="provider-icon mimo">Mi</span>
+                <span><strong>MiMo</strong><small>V2.5 音色克隆 · 需要 API Key</small></span>
+                <b>未配置</b>
+              </button>
+            </div>
+
+            <div id="providerSetup" class="provider-setup">
+              <strong id="providerSetupTitle">本地模型尚未安装</strong>
+              <p id="providerSetupDescription">点击安装后才会创建环境并下载模型。</p>
+
+              <div id="localInstallPanel" class="local-install-panel">
+                <label for="localModelSelect">本地模型</label>
+                <select id="localModelSelect">
+                  <option value="qwen-0.6b">Qwen3-TTS 0.6B Base（推荐，约数 GB）</option>
+                </select>
+                <button id="installLocalButton" class="provider-primary-button" type="button">安装本地模型</button>
+                <div id="installProgress" class="install-progress" hidden>
+                  <div><span id="installStep">准备安装</span><b id="installPercent">0%</b></div>
+                  <progress id="installProgressBar" max="100" value="0"></progress>
+                  <p id="installMessage">等待开始…</p>
+                </div>
+              </div>
+
+              <div id="cloudKeyPanel" class="cloud-key-panel" hidden>
+                <label id="cloudKeyLabel" for="cloudApiKey">API Key</label>
+                <input id="cloudApiKey" type="password" autocomplete="off" placeholder="输入 API Key" />
+                <span id="cloudKeyState">尚未配置</span>
+                <div>
+                  <button id="testCloudKey" type="button">测试连接</button>
+                  <button id="saveCloudKey" class="provider-primary-button" type="button">验证并保存</button>
+                  <button id="clearCloudKey" type="button">清除</button>
+                </div>
+                <p id="cloudKeyMessage">密钥只保存在本机服务端，不会写入网页或回显。</p>
+              </div>
+
+              <button id="configureProviderButton" class="provider-help-button" type="button">查看配置说明</button>
+            </div>
+
+            <div class="clone-step-heading provider-voices-heading">
+              <span class="step">04</span>
+              <div>
+                <h3>我的克隆音色</h3>
+                <p>音色档案保存在当前浏览器中。</p>
+              </div>
+            </div>
+
+            <div id="emptyVoiceState" class="empty-voice-state">
+              <div class="empty-avatar">+</div>
+              <strong>还没有克隆音色</strong>
+              <p>完成左侧两个步骤后，音色卡片会出现在这里。</p>
+            </div>
+
+            <div id="cloneVoiceCard" class="clone-voice-card" hidden>
+              <div class="clone-card-top">
+                <div class="voice-avatar"><i></i><i></i><i></i></div>
+                <div>
+                  <strong id="cloneCardName">我的音色</strong>
+                  <span id="cloneCardProvider">未绑定生成引擎</span>
+                </div>
+                <span class="ready-badge">已就绪</span>
+              </div>
+              <button id="playSampleButton" type="button">试听原始样本</button>
+              <label for="cloneDemoText">试听文本</label>
+              <textarea id="cloneDemoText" maxlength="300">你好，这是我的克隆音色。这段文字将使用当前声音样本的音色来朗读。</textarea>
+              <button id="demoGenerateButton" class="demo-generate-button" type="button">生成克隆语音</button>
+              <p id="demoGenerateStatus">请先配置所选克隆引擎。</p>
+              <div id="cloneResult" class="clone-result" hidden>
+                <audio id="cloneAudioPlayer" controls></audio>
+                <button id="downloadCloneButton" type="button">下载克隆 MP3</button>
+              </div>
+            </div>
+
+            <div id="providerHelp" class="provider-help" hidden>
+              <div class="provider-help-head">
+                <strong id="providerHelpTitle">配置说明</strong>
+                <button id="closeProviderHelp" type="button">关闭</button>
+              </div>
+              <div id="providerHelpContent"></div>
+            </div>
+          </aside>
+        </section>
+      </div>
+
+      <footer>
+        <span>文字转语音需要联网</span>
+        <i></i>
+        <span>音频保存在本机</span>
+        <i></i>
+        <span>48kHz / 192kbps 高质量输出</span>
+        <i></i>
+        <span>慢波为风格近似，并非平台专属原声</span>
+      </footer>
+    </main>
+    <script src="app.js?v=20260615-5"></script>
+  </body>
+</html>
